@@ -1,13 +1,20 @@
-var player;
-var platforms;
-var score = 0;
-var gameOver = false;
-var cursors;
-var triangle;
-var diamond;
-var square;
 
-var config = {
+var player;
+var score;
+var scoreText;
+var gameOver;
+var cursors;
+var figura;
+var cuad;
+var tri;
+var rombo;
+var myArray=[
+    {F:"triangulo", cant:0},
+    {F:"cuadrado", cant:0},
+    {F:"rombo", cant:0},
+];
+
+const config = {
     type: Phaser.AUTO,
     width: 800,
     height: 600,
@@ -33,7 +40,7 @@ var config = {
     scene:{preload: preload,create: create,update: update}
 };
 
-var game = new Phaser.Game(config);
+const game = new Phaser.Game(config);
 
 function preload(){
     this.load.image('cielo', 'public/assets/images/Cielo.png');
@@ -41,8 +48,7 @@ function preload(){
     this.load.image('rombo', 'public/assets/images/Rombo.png');
     this.load.image('tri', 'public/assets/images/Triangulo.png');
     this.load.image('ninja', 'public/assets/images/Ninja.png');
-    this.load.image('ground', 'public/assets/images/platform.png');
-    
+    this.load.image('suelo', 'public/assets/images/platform.png'); 
 }
 
 function create (){
@@ -59,13 +65,12 @@ function create (){
     this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'cielo').setScale(0.555);
     
 
-    platforms = this.physics.add.staticGroup();
+    let platforms = this.physics.add.staticGroup();
 
-    diamond = this.physics.add.group();
-    triangle = this.physics.add.group();
-    square = this.physics.add.group();
+    figura = this.physics.add.group();
+    
 
-    platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+    platforms.create(400, 568, 'suelo').setScale(2).refreshBody();
 
     player = this.physics.add.sprite(100, 450, "ninja");
     
@@ -73,25 +78,19 @@ function create (){
     
     this.physics.add.collider(player, platforms);
 
-    this.physics.add.collider(player, square);
-    this.physics.add.collider(platforms, square);
-
-    this.physics.add.collider(player, diamond);
-    this.physics.add.collider(platforms, diamond);
-
-    this.physics.add.collider(player, triangle);
-    this.physics.add.collider(platforms, triangle);
+    this.physics.add.collider(player, figura);
+    this.physics.add.collider(platforms, figura);
 
     cursors = this.input.keyboard.createCursorKeys();
 
-    this.physics.add.overlap(player, square, collectAsteroid, null, this);
-    this.physics.add.overlap(platforms, square, setGameOver, null, this);
+    this.physics.add.overlap(player, figura, collectAsteroid, null, this);
+    this.physics.add.overlap(platforms, figura, setGameOver, null, this);
 
-    this.physics.add.overlap(player, diamond, collectAsteroid, null, this);
-    this.physics.add.overlap(platforms, diamond, setGameOver, null, this);
-
-    this.physics.add.overlap(player, triangle, collectAsteroid, null, this);
-    this.physics.add.overlap(platforms, triangle, setGameOver, null, this);
+    scoreText = this.add.text(20, 20, "Score:" + score, {
+        fontSize: "32px",
+        fontStyle: 'bold', 
+        fill: "#FFFFFF",
+    });
     
 }
 function update(){
@@ -111,6 +110,8 @@ function update(){
     if (cursors.up.isDown && player.body.touching.down) {
         player.setVelocityY(-330);
     }
+
+    scoreText.text = "Score: " + score.toString();
 }
 
 function onSecond(){
@@ -118,60 +119,58 @@ function onSecond(){
         let min = Math.ceil(20);
         let max = Math.floor(680);
         let n = Math.floor(Math.random() * (max - min + 1) + min);
-        console.log (n);
-
-        /*switch (n) {
-            case (n%3 == 0):
-                console.log ("aa");
-                const cuad = this.add.image(n, 50, "cuad");
-                this.physics.add.existing(cuad);
-                cuad.body.setCircle(25,7,7);
-                square.add(cuad);
-                break;
-            case (n%2 == 0):
-                console.log ("bb");
-                const rombo = this.add.image(n, 50, "rombo");
-                this.physics.add.existing(rombo);
-                rombo.body.setCircle(25,7,7);
-                diamond.add(rombo);
-                break;
-            case (n%2 != 0) :
-                console.log ("cc");
-                const tri = this.add.image(n, 50, "tri");
-                this.physics.add.existing(tri);
-                tri.body.setCircle(25,7,7);
-                triangle.add(tri);
-                break;
-            default:
-                break;
-        }*/
 
         if (n%3 == 0) {
-            console.log ("cuadrado");
-            const cuad = this.add.image(n, 50, "cuad");
+            cuad = this.add.image(n, 50, "cuad");
             this.physics.add.existing(cuad);
             cuad.body.setCircle(25,7,7);
-            square.add(cuad);
+            figura.add(cuad);
 
         }else if (n%2 == 0) {
-            console.log ("rombo");
-            const rombo = this.add.image(n, 50, "rombo");
+            rombo = this.add.image(n, 50, "rombo");
             this.physics.add.existing(rombo);
             rombo.body.setCircle(25,7,7);
-            diamond.add(rombo);
+            figura.add(rombo);
 
-        }  else if (n%2 != 0) {
-            console.log ("triangulo");
-            const tri = this.add.image(n, 50, "tri");
+        }else if (n%2 != 0) {
+            tri = this.add.image(n, 50, "tri");
             this.physics.add.existing(tri);
             tri.body.setCircle(25,7,7);
-            triangle.add(tri);
+            figura.add(tri);
         }
     }
 }
 function collectAsteroid(player, asteroid){
+    let resultado = myArray.find( forma => forma.F === 'triangulo');
+    let resultado1 = myArray.find( forma => forma.F === 'cuadrado');
+    let resultado2 = myArray.find( forma => forma.F === 'rombo');
+
+    switch (asteroid) {
+        case tri:
+            resultado.cant++;
+            score += 10;
+            break;
+        case cuad:
+            resultado.cant++;
+            score += 20;
+            break;
+        case rombo:
+            resultado.cant++;
+            score += 10;
+            break;
+    
+        default:
+            break;
+    }
+
+    myArray.forEach(function(formas) {
+        if (resultado.cant >= 2 && resultado1.cant >= 2 && resultado2.cant >= 2) {
+            console.log("wawa")
+        }
+    });
     asteroid.destroy();
 }
+
 function setGameOver(){
     gameOver = true;
 }
