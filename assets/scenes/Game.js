@@ -5,6 +5,7 @@ export default class Game extends Phaser.Scene {
   gameOver;
   cursors;
   shapesGroup;
+  KeyR;
   isWin;
   myArray;
   constructor() {
@@ -19,6 +20,7 @@ export default class Game extends Phaser.Scene {
     this.load.image("ninja", "./assets/images/Ninja.png");
     this.load.image("ground", "./assets/images/platform.png");
     this.load.image("win", "./assets/images/win.png");
+    this.load.image("keyR", "./assets/images/keyR.png");
   }
 
   init() {
@@ -31,6 +33,7 @@ export default class Game extends Phaser.Scene {
       { F: "diamond", cant: 0 },
     ];
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.KeyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
   }
 
   create() {
@@ -86,6 +89,7 @@ export default class Game extends Phaser.Scene {
   update() {
     if (this.gameOver || this.isWin) {
       this.physics.pause();
+      this.restartSceneWithKeyR();
       return;
     }
     // Movement of player
@@ -160,6 +164,7 @@ export default class Game extends Phaser.Scene {
         .setScale(0.25);
       this.physics.pause();
       this.isWin = true;
+      this.restartSceneWithKeyR();
     }
 
     asteroid.destroy();
@@ -167,5 +172,17 @@ export default class Game extends Phaser.Scene {
 
   setGameOver() {
     this.gameOver = true;
+  }
+
+  restartSceneWithKeyR() {
+    this.shapesGroup.children.entries.forEach((item) => item.destroy());
+    this.add
+      .image(this.scale.width / 2, this.scale.height / 2 + 200, "keyR")
+      .setScale(0.25);
+    if (this.KeyR.isDown) {
+      this.gameOver = false;
+      this.isWin = false;
+      this.scene.restart();
+    }
   }
 }
