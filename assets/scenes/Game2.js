@@ -1,5 +1,5 @@
-export default class Game extends Phaser.Scene {
-  player;
+export default class Game2 extends Phaser.Scene{
+    player;
   score;
   scoreText;
   gameOver;
@@ -9,14 +9,14 @@ export default class Game extends Phaser.Scene {
   isWin;
   myArray;
   constructor() {
-    super("Game");
+    super("Game2");
   }
 
- 
+  
 
-  init() {
+  init(data) {
+    this.score = data.score;
     this.gameOver = false;
-    this.score = 0;
     this.isWin = false;
     this.myArray = [
       { F: "triangle", cant: 0 },
@@ -38,6 +38,7 @@ export default class Game extends Phaser.Scene {
     plataforms.create(400, 568, "ground").setScale(2).refreshBody();
     this.shapesGroup = this.physics.add.group();
 
+
     /*--- Players--- */
     this.player = this.physics.add.sprite(100, 450, "ninja");
     this.player.setCollideWorldBounds(true);
@@ -46,6 +47,8 @@ export default class Game extends Phaser.Scene {
     this.physics.add.collider(this.player, plataforms);
     this.physics.add.collider(this.player, this.shapesGroup);
     this.physics.add.collider(plataforms, this.shapesGroup);
+
+
     /*--- Physics - Overlaps--- */
     this.physics.add.overlap(
       this.player,
@@ -78,7 +81,7 @@ export default class Game extends Phaser.Scene {
   }
 
   update() {
-    if (this.gameOver) {
+    if (this.gameOver || this.isWin) {
       this.physics.pause();
       this.restartSceneWithKeyR();
       return;
@@ -111,8 +114,9 @@ export default class Game extends Phaser.Scene {
     this.physics.add.existing(asteroid);
     asteroid.body.setCircle(25, 7, 7);
     this.shapesGroup.add(asteroid);
-
-    if (randomNumber % 3 == 0) {
+    if (randomNumber % 5 == 0){
+        asteroid.setTexture("redDiamond").setTint(0xff0000);
+    } else if (randomNumber % 3 == 0) {
       asteroid.setTexture("square");
     } else if (randomNumber % 2 == 0) {
       asteroid.setTexture("diamond");
@@ -139,6 +143,9 @@ export default class Game extends Phaser.Scene {
         resultDiamond.cant++;
         this.score += 10;
         break;
+      case "redDiamond":
+        this.score -= 20;
+       break;
       default:
         break;
     }
@@ -155,17 +162,18 @@ export default class Game extends Phaser.Scene {
         .setScale(0.25);
       this.physics.pause();
       this.isWin = true;
-      setTimeout(() => {
-        this.scene.start("Game2", { score: this.score });
-      }, 1000);
-
+      this.restartSceneWithKeyR();
     }
 
     asteroid.destroy();
   }
 
-  setGameOver() {
-    this.gameOver = true;
+  setGameOver(ground, asteroid) {
+    if (asteroid.texture.key == "redDiamond") {
+        asteroid.destroy();
+    }else{
+        this.gameOver = true;
+    }   
   }
 
   restartSceneWithKeyR() {
@@ -176,7 +184,9 @@ export default class Game extends Phaser.Scene {
     if (this.KeyR.isDown) {
       this.gameOver = false;
       this.isWin = false;
-      this.scene.restart();
+      setTimeout(() => {
+        this.scene.start("Game2", { score: this.score });
+      }, 1000);
     }
   }
 }
