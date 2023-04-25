@@ -185,7 +185,7 @@ export default class Game2 extends Phaser.Scene{
       this.gameOver = false;
       this.isWin = false;
       setTimeout(() => {
-        this.scene.start("Game2", { score: this.score });
+        this.scene.start("Game", { score: this.score });
       }, 1000);
     }
   }
